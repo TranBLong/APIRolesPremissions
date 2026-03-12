@@ -63,14 +63,14 @@ public class UserController {
     //     return userService.getUsersByType(userType);
     // }
 
-    // GET /api/users?isActive=true
-    @GetMapping(params = "isActive")
+    // GET /api/users/active?isActive=true
+    @GetMapping("/active")
     public List<User> getActiveUsers(@RequestParam Boolean isActive) {
         return userService.getActiveUsers(isActive);
     }
 
-    // GET /api/users?page=0&size=10&sort=full_name,asc
-    @GetMapping(params = {"page", "size", "sort"})
+    // GET /api/users/page?page=0&size=10&sort=full_name,asc
+    @GetMapping("/page")
     public Page<User> getUsersPage(
             @RequestParam int page,
             @RequestParam int size,
