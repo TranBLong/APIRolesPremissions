@@ -14,11 +14,11 @@ public class Permission {
     @Column(name = "id")
     private UUID id;
 
-    @Column(name = "permission_code", nullable = false, unique = true, columnDefinition = "NVARCHAR(50)")
-    private String permissionCode;
+    @Column(name = "code", nullable = false, unique = true, columnDefinition = "NVARCHAR(100)")
+    private String code;
 
-    @Column(name = "permission_name", nullable = false, columnDefinition = "NVARCHAR(150)")
-    private String permissionName;
+    @Column(name = "name", nullable = false, columnDefinition = "NVARCHAR(150)")
+    private String name;
 
     @Column(name = "module", columnDefinition = "NVARCHAR(100)")
     private String module;
@@ -28,6 +28,15 @@ public class Permission {
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    @Column(name = "created_by")
+    private UUID createdBy;
+
+    @Column(name = "updated_by")
+    private UUID updatedBy;
+
+    @Column(name = "deleted_by")
+    private UUID deletedBy;
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
@@ -62,20 +71,20 @@ public class Permission {
         this.id = id;
     }
 
-    public String getPermissionCode() {
-        return permissionCode;
+    public String getCode() {
+        return code;
     }
 
-    public void setPermissionCode(String permissionCode) {
-        this.permissionCode = permissionCode;
+    public void setCode(String code) {
+        this.code = code;
     }
 
-    public String getPermissionName() {
-        return permissionName;
+    public String getName() {
+        return name;
     }
 
-    public void setPermissionName(String permissionName) {
-        this.permissionName = permissionName;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getModule() {
@@ -100,6 +109,30 @@ public class Permission {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public UUID getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(UUID createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public UUID getUpdatedBy() {
+        return updatedBy;
+    }
+
+    public void setUpdatedBy(UUID updatedBy) {
+        this.updatedBy = updatedBy;
+    }
+
+    public UUID getDeletedBy() {
+        return deletedBy;
+    }
+
+    public void setDeletedBy(UUID deletedBy) {
+        this.deletedBy = deletedBy;
     }
 
     public LocalDateTime getUpdatedAt() {

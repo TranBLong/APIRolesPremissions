@@ -31,6 +31,9 @@ public class User {
     @Column(name = "phone", columnDefinition = "NVARCHAR(20)")
     private String phone;
 
+    @Column(name = "avatar_url", columnDefinition = "NVARCHAR(255)")
+    private String avatarUrl;
+
     @Column(name = "last_login_at")
     private LocalDateTime lastLoginAt;
 
@@ -118,6 +121,13 @@ public class User {
         this.phone = phone;
     }
 
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
+    }
 
     public LocalDateTime getLastLoginAt() {
         return lastLoginAt;

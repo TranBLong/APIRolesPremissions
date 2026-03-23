@@ -39,8 +39,8 @@ public class PermissionServiceImpl implements PermissionService {
 
         Permission existing = getPermissionById(id);
 
-        existing.setPermissionCode(permission.getPermissionCode());
-        existing.setPermissionName(permission.getPermissionName());
+        existing.setCode(permission.getCode());
+        existing.setName(permission.getName());
         existing.setModule(permission.getModule());
         existing.setDescription(permission.getDescription());
 
@@ -65,13 +65,13 @@ public class PermissionServiceImpl implements PermissionService {
 
         if (name != null) {
             result = result.stream()
-                    .filter(p -> p.getPermissionName().toLowerCase().contains(name.toLowerCase()))
+                    .filter(p -> p.getName().toLowerCase().contains(name.toLowerCase()))
                     .collect(Collectors.toList());
         }
 
         if (code != null) {
             result = result.stream()
-                    .filter(p -> p.getPermissionCode().toLowerCase().contains(code.toLowerCase()))
+                    .filter(p -> p.getCode().toLowerCase().contains(code.toLowerCase()))
                     .collect(Collectors.toList());
         }
 
