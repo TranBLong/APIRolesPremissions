@@ -136,8 +136,9 @@
                 <table class="table table-hover text-nowrap mb-0">
                   <thead>
                     <tr>
-                      <th style="width: 40%">Tên</th>
-                      <th style="width: 40%">Email</th>
+                      <th style="width: 30%">Tên</th>
+                      <th style="width: 30%">Email</th>
+                      <th style="width: 20%">Trạng thái</th>
                       <th style="width: 20%" class="text-end">Hành động</th>
                     </tr>
                   </thead>
@@ -187,10 +188,65 @@
               <label class="form-label">Email</label>
               <input type="email" id="studentEmail" class="form-control" />
             </div>
+            <div class="mb-3">
+              <label class="form-label">Số điện thoại</label>
+              <input type="text" id="studentPhone" class="form-control" />
+            </div>
+
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
             <button type="button" class="btn btn-primary" id="btnSaveStudent">Lưu</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="userDetailModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Chi tiết users</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">ID</label>
+                <input type="text" class="form-control" id="detailId" readonly />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Trạng thái</label>
+                <input type="text" class="form-control" id="detailStatus" readonly />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Tên</label>
+                <input type="text" class="form-control" id="detailFullName" readonly />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Username</label>
+                <input type="text" class="form-control" id="detailUsername" readonly />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Email</label>
+                <input type="text" class="form-control" id="detailEmail" readonly />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Số điện thoại</label>
+                <input type="text" class="form-control" id="detailPhone" readonly />
+              </div>
+              <div class="col-12">
+                <label class="form-label">Roles</label>
+                <input type="text" class="form-control" id="detailRoles" readonly />
+              </div>
+              <div class="col-12">
+                <label class="form-label">Permissions</label>
+                <input type="text" class="form-control" id="detailPermissions" readonly />
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
           </div>
         </div>
       </div>
@@ -213,11 +269,17 @@
     <script>
       document.addEventListener('DOMContentLoaded', function () {
         const API_BASE = '/api/users';
-        const PAGE_SIZE = 5;
+        const PAGE_SIZE = 8;
+        const DEFAULT_SORT = 'full_name,asc';
 
         let currentPage = 0;
         let totalPages = 0;
         let totalElements = 0;
+        let serverTotalPages = 0;
+        let serverTotalElements = 0;
+        let loadMode = 'page';
+        let isServerPaging = true;
+        let currentSort = DEFAULT_SORT;
         let allStudents = [];
 
         const tableBody = document.getElementById('studentTableBody');
@@ -232,12 +294,35 @@
         const studentUsernameInput = document.getElementById('studentUsername');
         const studentPasswordInput = document.getElementById('studentPassword');
         const studentEmailInput = document.getElementById('studentEmail');
+        const studentPhoneInput = document.getElementById('studentPhone');
         const btnSaveStudent = document.getElementById('btnSaveStudent');
         const btnAdd = document.getElementById('btnAdd');
+        const filterNameInput = document.getElementById('filterName');
+        const filterUsernameInput = document.getElementById('filterUsername');
+        const filterEmailInput = document.getElementById('filterEmail');
+        const filterActiveSelect = document.getElementById('filterActive');
+        const sortSelect = document.getElementById('sortSelect');
+        const btnApplyFilters = document.getElementById('btnApplyFilters');
+        const btnLoadAll = document.getElementById('btnLoadAll');
+        const btnLoadPage = document.getElementById('btnLoadPage');
+
+        const userDetailModalEl = document.getElementById('userDetailModal');
+        const detailId = document.getElementById('detailId');
+        const detailStatus = document.getElementById('detailStatus');
+        const detailFullName = document.getElementById('detailFullName');
+        const detailUsername = document.getElementById('detailUsername');
+        const detailEmail = document.getElementById('detailEmail');
+        const detailPhone = document.getElementById('detailPhone');
+        const detailRoles = document.getElementById('detailRoles');
+        const detailPermissions = document.getElementById('detailPermissions');
 
         var studentModal = null;
         if (window.bootstrap && studentModalEl) {
           studentModal = new window.bootstrap.Modal(studentModalEl);
+        }
+        var userDetailModal = null;
+        if (window.bootstrap && userDetailModalEl) {
+          userDetailModal = new window.bootstrap.Modal(userDetailModalEl);
         }
 
         function highlightText(text, term) {
@@ -249,19 +334,55 @@
           });
         }
 
+        function normalizeText(value) {
+          return (value || '')
+            .toString()
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/đ/g, 'd')
+            .replace(/Đ/g, 'd');
+        }
+
         function renderTable(students) {
           const term = searchInput.value.trim();
           tableBody.innerHTML = students
             .map(function (s) {
+              const isActive =
+                typeof s.isActive === 'boolean'
+                  ? s.isActive
+                  : typeof s.active === 'boolean'
+                    ? s.active
+                    : true;
+              const statusBadge = isActive
+                ? '<span class="badge bg-success">Hoạt động</span>'
+                : '<span class="badge bg-secondary">Đã khóa</span>';
+              const lockAction = isActive
+                ? '<button class="btn btn-sm btn-outline-warning me-1" data-id="' +
+                  s.id +
+                  '" data-action="lock" title="Khóa">' +
+                  '<i class="bi bi-lock"></i>' +
+                  '</button>'
+                : '<button class="btn btn-sm btn-outline-success me-1" data-id="' +
+                  s.id +
+                  '" data-action="unlock" title="Mở khóa">' +
+                  '<i class="bi bi-unlock"></i>' +
+                  '</button>';
               return (
-                '<tr>' +
+                '<tr class="user-row" data-id="' +
+                s.id +
+                '">' +
                 '<td>' +
                 highlightText(s.fullName || '', term) +
                 '</td>' +
                 '<td>' +
                 highlightText(s.email || '', term) +
                 '</td>' +
+                '<td>' +
+                statusBadge +
+                '</td>' +
                 '<td class="text-end">' +
+                lockAction +
                 '<button class="btn btn-sm btn-outline-secondary me-1" data-id="' +
                 s.id +
                 '" data-action="edit">' +
@@ -287,14 +408,27 @@
         }
 
         function applyFilterAndRender() {
-          const term = searchInput.value.trim().toLowerCase();
+          const term = normalizeText(searchInput.value.trim());
           const filtered = allStudents.filter(function (s) {
             if (!term) return true;
-            const fullName = (s.fullName || '').toLowerCase();
-            const email = (s.email || '').toLowerCase();
-            const username = (s.username || '').toLowerCase();
-            return fullName.includes(term) || email.includes(term) || username.includes(term);
+            const name = normalizeText(s.name);
+            const fullName = normalizeText(s.fullName);
+            const email = normalizeText(s.email);
+            const username = normalizeText(s.username);
+            return (
+              name.includes(term) ||
+              fullName.includes(term) ||
+              email.includes(term) ||
+              username.includes(term)
+            );
           });
+
+          if (isServerPaging && !term) {
+            totalElements = serverTotalElements;
+            totalPages = serverTotalPages;
+            renderTable(allStudents);
+            return;
+          }
 
           totalElements = filtered.length;
           totalPages = totalElements === 0 ? 0 : Math.ceil(totalElements / PAGE_SIZE);
@@ -348,14 +482,68 @@
           const page = Number(e.target.getAttribute('data-page'));
           if (isNaN(page) || page === currentPage || page < 0 || page >= totalPages) return;
           currentPage = page;
-          loadStudents();
+          if (isServerPaging) {
+            loadStudents();
+          } else {
+            applyFilterAndRender();
+          }
         });
         searchInput.addEventListener('input', function () {
           currentPage = 0;
           applyFilterAndRender();
         });
 
+        function setMode(mode) {
+          loadMode = mode;
+          isServerPaging = mode === 'page';
+          searchInput.disabled = false;
+          currentPage = 0;
+        }
+
+        function buildSearchParams() {
+          const name = filterNameInput ? filterNameInput.value.trim() : '';
+          const username = filterUsernameInput ? filterUsernameInput.value.trim() : '';
+          const email = filterEmailInput ? filterEmailInput.value.trim() : '';
+          const params = new URLSearchParams();
+          if (name) params.set('name', name);
+          if (username) params.set('username', username);
+          if (email) params.set('email', email);
+          return params;
+        }
+
         async function loadStudents() {
+          if (loadMode === 'search') {
+            return loadStudentsSearch();
+          }
+          if (loadMode === 'active') {
+            return loadStudentsActive();
+          }
+          if (loadMode === 'all') {
+            return loadStudentsAll();
+          }
+          return loadStudentsPage();
+        }
+
+        async function loadStudentsPage() {
+          try {
+            currentSort = sortSelect ? sortSelect.value || DEFAULT_SORT : DEFAULT_SORT;
+            const params = new URLSearchParams({
+              page: String(currentPage),
+              size: String(PAGE_SIZE),
+              sort: currentSort,
+            });
+            const res = await fetch(API_BASE + '/page?' + params.toString());
+            const data = await res.json();
+            allStudents = Array.isArray(data.content) ? data.content : [];
+            serverTotalElements = typeof data.totalElements === 'number' ? data.totalElements : 0;
+            serverTotalPages = typeof data.totalPages === 'number' ? data.totalPages : 0;
+            applyFilterAndRender();
+          } catch (e) {
+            console.error('Lỗi tải danh sách users theo trang', e);
+          }
+        }
+
+        async function loadStudentsAll() {
           try {
             const res = await fetch(API_BASE);
             const data = await res.json();
@@ -363,6 +551,37 @@
             applyFilterAndRender();
           } catch (e) {
             console.error('Lỗi tải danh sách users', e);
+          }
+        }
+
+        async function loadStudentsSearch() {
+          try {
+            const params = buildSearchParams();
+            if ([...params.keys()].length === 0) {
+              return loadStudentsAll();
+            }
+            const res = await fetch(API_BASE + '/search?' + params.toString());
+            const data = await res.json();
+            allStudents = Array.isArray(data) ? data : [];
+            applyFilterAndRender();
+          } catch (e) {
+            console.error('Lỗi tìm kiếm users', e);
+          }
+        }
+
+        async function loadStudentsActive() {
+          try {
+            const activeValue = filterActiveSelect ? filterActiveSelect.value : '';
+            if (activeValue === '') {
+              return loadStudentsAll();
+            }
+            const params = new URLSearchParams({ isActive: activeValue });
+            const res = await fetch(API_BASE + '/active?' + params.toString());
+            const data = await res.json();
+            allStudents = Array.isArray(data) ? data : [];
+            applyFilterAndRender();
+          } catch (e) {
+            console.error('Lỗi lọc users theo trạng thái', e);
           }
         }
 
@@ -376,6 +595,7 @@
           studentUsernameInput.value = '';
           studentPasswordInput.value = '';
           studentEmailInput.value = '';
+          studentPhoneInput.value = '';
           studentModalTitle.textContent = 'Thêm users';
           btnSaveStudent.dataset.mode = 'create';
           studentModal.show();
@@ -389,6 +609,7 @@
           studentUsernameInput.value = student.username || '';
           studentPasswordInput.value = '';
           studentEmailInput.value = student.email || '';
+          studentPhoneInput.value = student.phone || '';
           studentModalTitle.textContent = 'Cập nhật users';
           btnSaveStudent.dataset.mode = 'update';
           studentModal.show();
@@ -398,28 +619,129 @@
           openAddModal();
         });
 
+        if (
+          btnApplyFilters &&
+          filterNameInput &&
+          filterUsernameInput &&
+          filterEmailInput &&
+          filterActiveSelect
+        ) {
+          btnApplyFilters.addEventListener('click', function () {
+            const hasSearch =
+              filterNameInput.value.trim() ||
+              filterUsernameInput.value.trim() ||
+              filterEmailInput.value.trim();
+            const activeValue = filterActiveSelect.value;
+
+            if (hasSearch) {
+              setMode('search');
+            } else if (activeValue !== '') {
+              setMode('active');
+            } else {
+              setMode('page');
+            }
+            loadStudents();
+          });
+        }
+
+        if (btnLoadAll) {
+          btnLoadAll.addEventListener('click', function () {
+            setMode('all');
+            loadStudents();
+          });
+        }
+
+        if (btnLoadPage) {
+          btnLoadPage.addEventListener('click', function () {
+            setMode('page');
+            loadStudents();
+          });
+        }
+
+        if (sortSelect) {
+          sortSelect.addEventListener('change', function () {
+            if (loadMode === 'page') {
+              currentPage = 0;
+              loadStudents();
+            }
+          });
+        }
+
         tableBody.addEventListener('click', function (e) {
           const btn = e.target.closest('button[data-action]');
-          if (!btn) return;
-          const id = btn.getAttribute('data-id');
-          const action = btn.getAttribute('data-action');
-          if (action === 'edit') {
-            // Lấy chi tiết users từ API để luôn dữ liệu mới nhất
-            fetch(API_BASE + '/' + id)
-              .then(function (res) {
-                return res.json();
-              })
-              .then(function (student) {
-                openEditModal(student || {});
-              })
-              .catch(function () {
-                alert('Không tải được thông tin users.');
-              });
-          } else if (action === 'delete') {
-            if (confirm('Bạn có chắc chắn muốn xóa users này?')) {
-              deleteStudent(id);
+          if (btn) {
+            const id = btn.getAttribute('data-id');
+            const action = btn.getAttribute('data-action');
+            if (action === 'edit') {
+              // Lấy chi tiết users từ API để luôn dữ liệu mới nhất
+              fetch(API_BASE + '/' + id)
+                .then(function (res) {
+                  return res.json();
+                })
+                .then(function (student) {
+                  openEditModal(student || {});
+                })
+                .catch(function () {
+                  alert('Không tải được thông tin users.');
+                });
+            } else if (action === 'lock') {
+              lockUser(id);
+            } else if (action === 'unlock') {
+              unlockUser(id);
+            } else if (action === 'delete') {
+              if (confirm('Bạn có chắc chắn muốn xóa users này?')) {
+                deleteStudent(id);
+              }
             }
+            return;
           }
+
+          const row = e.target.closest('tr.user-row');
+          if (!row) return;
+          const id = row.getAttribute('data-id');
+          if (!id) return;
+          fetch(API_BASE + '/' + id)
+            .then(function (res) {
+              return res.json();
+            })
+            .then(function (user) {
+              const isActive =
+                typeof user.isActive === 'boolean'
+                  ? user.isActive
+                  : typeof user.active === 'boolean'
+                    ? user.active
+                    : true;
+              detailId.value = user.id || '';
+              detailStatus.value = isActive ? 'Hoạt động' : 'Đã khóa';
+              detailFullName.value = user.fullName || '';
+              detailUsername.value = user.username || '';
+              detailEmail.value = user.email || '';
+              detailPhone.value = user.phone || '';
+              const roles =
+                Array.isArray(user.roles) && user.roles.length
+                  ? user.roles
+                      .map(function (r) {
+                        return r.name || r.code || r;
+                      })
+                      .join(', ')
+                  : '';
+              const permissions =
+                Array.isArray(user.permissions) && user.permissions.length
+                  ? user.permissions
+                      .map(function (p) {
+                        return p.name || p.code || p;
+                      })
+                      .join(', ')
+                  : '';
+              detailRoles.value = roles;
+              detailPermissions.value = permissions;
+              if (userDetailModal) {
+                userDetailModal.show();
+              }
+            })
+            .catch(function () {
+              alert('Không tải được thông tin users.');
+            });
         });
 
         async function saveStudent() {
@@ -428,6 +750,7 @@
           const username = studentUsernameInput.value.trim();
           const password = studentPasswordInput.value;
           const email = studentEmailInput.value.trim();
+          const phone = studentPhoneInput.value.trim();
 
           if (!name || !email || !username) {
             alert('Vui lòng nhập đầy đủ tên, username và email.');
@@ -446,7 +769,7 @@
             fullName: name,
             email: email,
             username: username,
-            phone: isUpdate ? (currentEditingStudent && currentEditingStudent.phone) || '' : '',
+            phone: phone,
             isActive: isUpdate
               ? currentEditingStudent && typeof currentEditingStudent.isActive === 'boolean'
                 ? currentEditingStudent.isActive
@@ -499,6 +822,32 @@
           }
         }
 
+        async function lockUser(id) {
+          try {
+            const res = await fetch(API_BASE + '/' + id + '/lock', { method: 'PUT' });
+            if (!res.ok) {
+              throw new Error(await res.text());
+            }
+            await loadStudents();
+          } catch (e) {
+            console.error('Lỗi khóa users', e);
+            alert('Có lỗi xảy ra khi khóa users.');
+          }
+        }
+
+        async function unlockUser(id) {
+          try {
+            const res = await fetch(API_BASE + '/' + id + '/unlock', { method: 'PUT' });
+            if (!res.ok) {
+              throw new Error(await res.text());
+            }
+            await loadStudents();
+          } catch (e) {
+            console.error('Lỗi mở khóa users', e);
+            alert('Có lỗi xảy ra khi mở khóa users.');
+          }
+        }
+
         const SELECTOR_SIDEBAR_WRAPPER = '.sidebar-wrapper';
         const Default = {
           scrollbarTheme: 'os-theme-light',
@@ -516,6 +865,10 @@
           });
         }
 
+        if (sortSelect) {
+          sortSelect.value = DEFAULT_SORT;
+        }
+        setMode('page');
         loadStudents();
       });
     </script>
