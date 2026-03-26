@@ -43,7 +43,7 @@ public class RoleService {
     }
 
     public List<Role> searchRoles(String name, String code) {
-        return roleRepository.findByRoleNameContainingIgnoreCaseAndRoleCodeContainingIgnoreCaseAndDeletedAtIsNull(name, code);
+        return roleRepository.findByNameContainingIgnoreCaseAndCodeContainingIgnoreCaseAndDeletedAtIsNull(name, code);
     }
 
     public List<Role> getActiveRoles(Boolean isActive) {

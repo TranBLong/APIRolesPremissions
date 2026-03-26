@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
+import java.text.Normalizer;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -32,12 +33,24 @@ public class UserService {
     public User updateUser(UUID id, User userData) {
         User user = userRepository.findByIdAndDeletedAtIsNull(id).orElseThrow();
 
-        user.setUsername(userData.getUsername());
-        user.setPasswordHash(userData.getPasswordHash());
-        user.setFullName(userData.getFullName());
-        user.setEmail(userData.getEmail());
-        user.setPhone(userData.getPhone());
-        user.setIsActive(userData.getIsActive());
+        if (userData.getUsername() != null && !userData.getUsername().isBlank()) {
+            user.setUsername(userData.getUsername());
+        }
+        if (userData.getPasswordHash() != null && !userData.getPasswordHash().isBlank()) {
+            user.setPasswordHash(userData.getPasswordHash());
+        }
+        if (userData.getFullName() != null) {
+            user.setFullName(userData.getFullName());
+        }
+        if (userData.getEmail() != null) {
+            user.setEmail(userData.getEmail());
+        }
+        if (userData.getPhone() != null) {
+            user.setPhone(userData.getPhone());
+        }
+        if (userData.getIsActive() != null) {
+            user.setIsActive(userData.getIsActive());
+        }
 
         return userRepository.save(user);
     }
@@ -50,23 +63,26 @@ public class UserService {
         List<User> result = userRepository.findByDeletedAtIsNull();
 
         if (name != null && !name.isBlank()) {
+            String nameKey = normalizeText(name);
             result = result.stream()
                     .filter(u -> u.getFullName() != null
-                            && u.getFullName().toLowerCase().contains(name.toLowerCase()))
+                            && normalizeText(u.getFullName()).contains(nameKey))
                     .collect(Collectors.toList());
         }
 
         if (username != null && !username.isBlank()) {
+            String usernameKey = normalizeText(username);
             result = result.stream()
                     .filter(u -> u.getUsername() != null
-                            && u.getUsername().toLowerCase().contains(username.toLowerCase()))
+                            && normalizeText(u.getUsername()).contains(usernameKey))
                     .collect(Collectors.toList());
         }
 
         if (email != null && !email.isBlank()) {
+            String emailKey = normalizeText(email);
             result = result.stream()
                     .filter(u -> u.getEmail() != null
-                            && u.getEmail().toLowerCase().contains(email.toLowerCase()))
+                            && normalizeText(u.getEmail()).contains(emailKey))
                     .collect(Collectors.toList());
         }
 
@@ -119,5 +135,12 @@ public class UserService {
             return "isActive";
         }
         return field;
+    }
+
+    private String normalizeText(String input) {
+        if (input == null) return "";
+        String lower = input.trim().toLowerCase();
+        String normalized = Normalizer.normalize(lower, Normalizer.Form.NFD);
+        return normalized.replaceAll("\\p{M}", "");
     }
 }

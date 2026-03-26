@@ -18,7 +18,7 @@ public interface RoleRepository extends JpaRepository<Role, UUID>, JpaSpecificat
 
     List<Role> findByDeletedAtIsNull();
 
-    List<Role> findByRoleNameContainingIgnoreCaseAndRoleCodeContainingIgnoreCaseAndDeletedAtIsNull(String name, String code);
+    List<Role> findByNameContainingIgnoreCaseAndCodeContainingIgnoreCaseAndDeletedAtIsNull(String name, String code);
 
     Optional<Role> findByIdAndDeletedAtIsNull(UUID id);
 

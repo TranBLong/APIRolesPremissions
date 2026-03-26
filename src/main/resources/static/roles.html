@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Quản lý roles | AdminLTE 4</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#007bff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1a1a1a" media="(prefers-color-scheme: dark)" />
+
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@fontsource/source-sans-3@5.0.12/index.css"
+      crossorigin="anonymous"
+      media="print"
+      onload="this.media='all'"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.11.0/styles/overlayscrollbars.min.css"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="./adminlte/css/adminlte.css" />
+  </head>
+  <body class="layout-fixed sidebar-expand-lg sidebar-open bg-body-tertiary">
+    <div class="app-wrapper">
+      <nav class="app-header navbar navbar-expand bg-body">
+        <div class="container-fluid">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link" data-lte-toggle="sidebar" href="#" role="button">
+                <i class="bi bi-list"></i>
+              </a>
+            </li>
+            <li class="nav-item d-none d-md-block">
+              <span class="nav-link fw-semibold">Quản lý roles</span>
+            </li>
+          </ul>
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="#" data-lte-toggle="fullscreen">
+                <i data-lte-icon="maximize" class="bi bi-arrows-fullscreen"></i>
+                <i data-lte-icon="minimize" class="bi bi-fullscreen-exit" style="display: none"></i>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+
+      <aside class="app-sidebar bg-body-secondary shadow" data-bs-theme="dark">
+        <div class="sidebar-brand">
+          <a href="./index.html" class="brand-link">
+            <img
+              src="./adminlte/assets/img/AdminLTELogo.png"
+              alt="AdminLTE Logo"
+              class="brand-image opacity-75 shadow"
+            />
+            <span class="brand-text fw-light">School Manager</span>
+          </a>
+        </div>
+        <div class="sidebar-wrapper">
+          <nav class="mt-2">
+            <ul
+              class="nav sidebar-menu flex-column"
+              data-lte-toggle="treeview"
+              role="navigation"
+              aria-label="Main navigation"
+              data-accordion="false"
+            >
+              <li class="nav-item">
+                <a href="./users.html" class="nav-link">
+                  <i class="nav-icon bi bi-people-fill"></i>
+                  <p>Users</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="./roles.html" class="nav-link active">
+                  <i class="nav-icon bi bi-shield-lock"></i>
+                  <p>Roles</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="./permissions.html" class="nav-link">
+                  <i class="nav-icon bi bi-shield-lock"></i>
+                  <p>Permissions</p>
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </aside>
+
+      <main class="app-main">
+        <div class="app-content-header">
+          <div class="container-fluid">
+            <div class="row">
+              <div class="col-sm-6">
+                <h3 class="mb-0">Quản lý roles</h3>
+              </div>
+              <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-end">
+                  <li class="breadcrumb-item"><a href="#">Home</a></li>
+                  <li class="breadcrumb-item active" aria-current="page">Roles</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="app-content">
+          <div class="container-fluid">
+            <div class="card">
+              <div class="card-header d-flex flex-wrap gap-2 align-items-center">
+                <h3 class="card-title mb-0">Danh sách roles</h3>
+                <div class="ms-auto d-flex flex-wrap gap-2">
+                  <div class="input-group input-group-sm" style="width: 260px">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input
+                      type="text"
+                      id="searchInput"
+                      class="form-control"
+                      placeholder="Tìm gần đúng theo tên/mô tả..."
+                    />
+                  </div>
+                  <button class="btn btn-primary btn-sm" id="btnAdd">
+                    <i class="bi bi-plus-circle me-1"></i> Thêm role
+                  </button>
+                </div>
+              </div>
+              <div class="card-body table-responsive p-0">
+                <table class="table table-hover text-nowrap mb-0">
+                  <thead>
+                    <tr>
+                      <th style="width: 40%">Tên</th>
+                      <th style="width: 40%">Mô tả</th>
+                      <th style="width: 20%" class="text-end">Hành động</th>
+                    </tr>
+                  </thead>
+                  <tbody id="roleTableBody"></tbody>
+                </table>
+              </div>
+              <div class="card-footer d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <div class="small text-secondary" id="paginationInfo"></div>
+                <nav>
+                  <ul class="pagination pagination-sm mb-0" id="pagination"></ul>
+                </nav>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <footer class="app-footer">
+        <div class="float-end d-none d-sm-inline">School Manager</div>
+        <strong>Quản lý roles với AdminLTE 4</strong>
+      </footer>
+    </div>
+
+    <div class="modal fade" id="roleModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="roleModalTitle">Thêm role</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="roleId" />
+            <div class="mb-3">
+              <label class="form-label">Tên role</label>
+              <input type="text" id="roleName" class="form-control" />
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Mô tả</label>
+              <textarea id="roleDescription" class="form-control" rows="3"></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+            <button type="button" class="btn btn-primary" id="btnSaveRole">Lưu</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.11.0/browser/overlayscrollbars.browser.es6.min.js"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.min.js"
+      crossorigin="anonymous"
+    ></script>
+    <script src="./adminlte/js/adminlte.js"></script>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const API_BASE = '/api/roles';
+        const PAGE_SIZE = 5;
+
+        let currentPage = 0;
+        let totalPages = 0;
+        let totalElements = 0;
+        let allRoles = [];
+
+        const tableBody = document.getElementById('roleTableBody');
+        const pagination = document.getElementById('pagination');
+        const paginationInfo = document.getElementById('paginationInfo');
+        const searchInput = document.getElementById('searchInput');
+
+        const roleModalEl = document.getElementById('roleModal');
+        const roleModalTitle = document.getElementById('roleModalTitle');
+        const roleIdInput = document.getElementById('roleId');
+        const roleNameInput = document.getElementById('roleName');
+        const roleDescriptionInput = document.getElementById('roleDescription');
+        const btnSaveRole = document.getElementById('btnSaveRole');
+        const btnAdd = document.getElementById('btnAdd');
+
+        var roleModal = null;
+        if (window.bootstrap && roleModalEl) {
+          roleModal = new window.bootstrap.Modal(roleModalEl);
+        }
+
+        function highlightText(text, term) {
+          if (!term) return text;
+          const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const re = new RegExp(escaped, 'ig');
+          return text.replace(re, function (m) {
+            return '<mark>' + m + '</mark>';
+          });
+        }
+
+        function renderTable(roles) {
+          const term = searchInput.value.trim();
+          tableBody.innerHTML = roles
+            .map(function (r) {
+              return (
+                '<tr>' +
+                '<td>' +
+                highlightText(r.name || '', term) +
+                '</td>' +
+                '<td>' +
+                highlightText(r.description || '', term) +
+                '</td>' +
+                '<td class="text-end">' +
+                '<button class="btn btn-sm btn-outline-secondary me-1" data-id="' +
+                r.id +
+                '" data-action="edit">' +
+                '<i class="bi bi-pencil"></i>' +
+                '</button>' +
+                '<button class="btn btn-sm btn-outline-danger" data-id="' +
+                r.id +
+                '" data-action="delete">' +
+                '<i class="bi bi-trash"></i>' +
+                '</button>' +
+                '</td>' +
+                '</tr>'
+              );
+            })
+            .join('');
+
+          const from = totalElements === 0 ? 0 : currentPage * PAGE_SIZE + 1;
+          const to = Math.min((currentPage + 1) * PAGE_SIZE, totalElements);
+          paginationInfo.textContent =
+            'Hiển thị ' + from + '-' + to + ' trên tổng ' + totalElements + ' roles';
+
+          renderPagination();
+        }
+
+        function applyFilterAndRender() {
+          const term = searchInput.value.trim().toLowerCase();
+          const filtered = allRoles.filter(function (r) {
+            if (!term) return true;
+            const name = (r.name || '').toLowerCase();
+            const description = (r.description || '').toLowerCase();
+            return name.includes(term) || description.includes(term);
+          });
+
+          totalElements = filtered.length;
+          totalPages = totalElements === 0 ? 0 : Math.ceil(totalElements / PAGE_SIZE);
+          if (currentPage >= totalPages) {
+            currentPage = Math.max(0, totalPages - 1);
+          }
+
+          const start = currentPage * PAGE_SIZE;
+          const pageItems = filtered.slice(start, start + PAGE_SIZE);
+          renderTable(pageItems);
+        }
+
+        function renderPagination() {
+          if (totalPages === 0) {
+            pagination.innerHTML = '';
+            return;
+          }
+
+          var html = '';
+          html +=
+            '<li class="page-item ' +
+            (currentPage === 0 ? 'disabled' : '') +
+            '"><a class="page-link" href="#" data-page="' +
+            (currentPage - 1) +
+            '">&laquo;</a></li>';
+
+          for (var i = 0; i < totalPages; i++) {
+            html +=
+              '<li class="page-item ' +
+              (i === currentPage ? 'active' : '') +
+              '"><a class="page-link" href="#" data-page="' +
+              i +
+              '">' +
+              (i + 1) +
+              '</a></li>';
+          }
+
+          html +=
+            '<li class="page-item ' +
+            (currentPage === totalPages - 1 ? 'disabled' : '') +
+            '"><a class="page-link" href="#" data-page="' +
+            (currentPage + 1) +
+            '">&raquo;</a></li>';
+
+          pagination.innerHTML = html;
+        }
+
+        pagination.addEventListener('click', function (e) {
+          if (e.target.tagName !== 'A') return;
+          e.preventDefault();
+          const page = Number(e.target.getAttribute('data-page'));
+          if (isNaN(page) || page === currentPage || page < 0 || page >= totalPages) return;
+          currentPage = page;
+          loadRoles();
+        });
+        searchInput.addEventListener('input', function () {
+          currentPage = 0;
+          applyFilterAndRender();
+        });
+
+        async function loadRoles() {
+          try {
+            const res = await fetch(API_BASE);
+            const data = await res.json();
+            allRoles = Array.isArray(data) ? data : [];
+            applyFilterAndRender();
+          } catch (e) {
+            console.error('Lỗi tải danh sách roles', e);
+          }
+        }
+
+        let currentEditingRole = null;
+
+        function openAddModal() {
+          if (!roleModal) return;
+          currentEditingRole = null;
+          roleIdInput.value = '';
+          roleNameInput.value = '';
+          roleDescriptionInput.value = '';
+          roleModalTitle.textContent = 'Thêm role';
+          btnSaveRole.dataset.mode = 'create';
+          roleModal.show();
+        }
+
+        function openEditModal(role) {
+          if (!roleModal) return;
+          currentEditingRole = role || {};
+          roleIdInput.value = role.id;
+          roleNameInput.value = role.name || '';
+          roleDescriptionInput.value = role.description || '';
+          roleModalTitle.textContent = 'Cập nhật role';
+          btnSaveRole.dataset.mode = 'update';
+          roleModal.show();
+        }
+
+        btnAdd.addEventListener('click', function () {
+          openAddModal();
+        });
+
+        tableBody.addEventListener('click', function (e) {
+          const btn = e.target.closest('button[data-action]');
+          if (!btn) return;
+          const id = btn.getAttribute('data-id');
+          const action = btn.getAttribute('data-action');
+          if (action === 'edit') {
+            // Lấy chi tiết role từ API để luôn dữ liệu mới nhất
+            fetch(API_BASE + '/' + id)
+              .then(function (res) {
+                return res.json();
+              })
+              .then(function (role) {
+                openEditModal(role || {});
+              })
+              .catch(function () {
+                alert('Không tải được thông tin role.');
+              });
+          } else if (action === 'delete') {
+            if (confirm('Bạn có chắc chắn muốn xóa role này?')) {
+              deleteRole(id);
+            }
+          }
+        });
+
+        async function saveRole() {
+          const mode = btnSaveRole.dataset.mode;
+          const name = roleNameInput.value.trim();
+          const description = roleDescriptionInput.value.trim();
+
+          if (!name) {
+            alert('Vui lòng nhập tên role.');
+            return;
+          }
+
+          const isUpdate = mode === 'update';
+          const id = roleIdInput.value;
+
+          const payload = {
+            name: name,
+            description: description,
+          };
+
+          const url = isUpdate ? API_BASE + '/' + id : API_BASE;
+          const method = isUpdate ? 'PUT' : 'POST';
+
+          try {
+            const res = await fetch(url, {
+              method: method,
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload),
+            });
+            if (!res.ok) {
+              throw new Error(await res.text());
+            }
+            if (roleModal) {
+              roleModal.hide();
+            }
+            await loadRoles();
+          } catch (e) {
+            console.error('Lỗi lưu role', e);
+            alert('Có lỗi xảy ra khi lưu role.');
+          }
+        }
+
+        btnSaveRole.addEventListener('click', function () {
+          saveRole();
+        });
+
+        async function deleteRole(id) {
+          try {
+            const res = await fetch(API_BASE + '/' + id, { method: 'DELETE' });
+            if (!res.ok) {
+              throw new Error(await res.text());
+            }
+            await loadRoles();
+          } catch (e) {
+            console.error('Lỗi xóa role', e);
+            alert('Có lỗi xảy ra khi xóa role.');
+          }
+        }
+
+        const SELECTOR_SIDEBAR_WRAPPER = '.sidebar-wrapper';
+        const Default = {
+          scrollbarTheme: 'os-theme-light',
+          scrollbarAutoHide: 'leave',
+          scrollbarClickScroll: true,
+        };
+        const sidebarWrapper = document.querySelector(SELECTOR_SIDEBAR_WRAPPER);
+        if (sidebarWrapper && window.OverlayScrollbarsGlobal && window.OverlayScrollbarsGlobal.OverlayScrollbars) {
+          window.OverlayScrollbarsGlobal.OverlayScrollbars(sidebarWrapper, {
+            scrollbars: {
+              theme: Default.scrollbarTheme,
+              autoHide: Default.scrollbarAutoHide,
+              clickScroll: Default.scrollbarClickScroll,
+            },
+          });
+        }
+
+        loadRoles();
+      });
+    </script>
+  </body>
+</html>

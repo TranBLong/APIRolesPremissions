@@ -11,9 +11,9 @@ import java.util.UUID;
 
 public interface PermissionRepository extends JpaRepository<Permission, UUID> {
 
-    List<Permission> findByPermissionNameContainingIgnoreCaseAndDeletedAtIsNull(String name);
+    List<Permission> findByNameContainingIgnoreCaseAndDeletedAtIsNull(String name);
 
-    List<Permission> findByPermissionCodeContainingIgnoreCaseAndDeletedAtIsNull(String code);
+    List<Permission> findByCodeContainingIgnoreCaseAndDeletedAtIsNull(String code);
 
     List<Permission> findByModuleAndDeletedAtIsNull(String module);
 
@@ -21,7 +21,7 @@ public interface PermissionRepository extends JpaRepository<Permission, UUID> {
 
     List<Permission> findByDeletedAtIsNull();
 
-    Optional<Permission> findByPermissionCodeAndDeletedAtIsNull(String permissionCode);
+    Optional<Permission> findByCodeAndDeletedAtIsNull(String code);
 
     Optional<Permission> findByIdAndDeletedAtIsNull(UUID id);
 
