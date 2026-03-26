@@ -136,10 +136,11 @@
                 <table class="table table-hover text-nowrap mb-0">
                   <thead>
                     <tr>
+                      <th style="width: 20%">Username</th>
                       <th style="width: 30%">Tên</th>
                       <th style="width: 30%">Email</th>
-                      <th style="width: 20%">Trạng thái</th>
-                      <th style="width: 20%" class="text-end">Hành động</th>
+                      <th style="width: 10%">Trạng thái</th>
+                      <th style="width: 10%" class="text-end">Hành động</th>
                     </tr>
                   </thead>
                   <tbody id="studentTableBody"></tbody>
@@ -372,6 +373,9 @@
                 '<tr class="user-row" data-id="' +
                 s.id +
                 '">' +
+                '<td>' +
+                highlightText(s.username || '', term) +
+                '</td>' +
                 '<td>' +
                 highlightText(s.fullName || '', term) +
                 '</td>' +
