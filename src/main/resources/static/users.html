@@ -127,6 +127,9 @@
                       placeholder="Tìm gần đúng theo tên/email..."
                     />
                   </div>
+                  <button class="btn btn-outline-success btn-sm" id="btnLoadActive">
+                    <i class="bi bi-check-circle me-1"></i> Đang hoạt động
+                  </button>
                   <button class="btn btn-primary btn-sm" id="btnAdd">
                     <i class="bi bi-plus-circle me-1"></i> Thêm users
                   </button>
@@ -197,7 +200,7 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-            <button type="button" class="btn btn-primary" id="btnSaveStudent">Lưu</button>
+            <button type="button" class="btn btn-primary" id="btnSaveStudent">Luu</button>
           </div>
         </div>
       </div>
@@ -247,7 +250,7 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ðóng</button>
           </div>
         </div>
       </div>
@@ -276,6 +279,7 @@
         let currentPage = 0;
         let totalPages = 0;
         let totalElements = 0;
+        let activeFilterMode = 0;
         let serverTotalPages = 0;
         let serverTotalElements = 0;
         let loadMode = 'page';
@@ -305,6 +309,7 @@
         const sortSelect = document.getElementById('sortSelect');
         const btnApplyFilters = document.getElementById('btnApplyFilters');
         const btnLoadAll = document.getElementById('btnLoadAll');
+        const btnLoadActive = document.getElementById('btnLoadActive');
         const btnLoadPage = document.getElementById('btnLoadPage');
 
         const userDetailModalEl = document.getElementById('userDetailModal');
@@ -341,8 +346,8 @@
             .toLowerCase()
             .normalize('NFD')
             .replace(/[\u0300-\u036f]/g, '')
-            .replace(/đ/g, 'd')
-            .replace(/Đ/g, 'd');
+            .replace(/d/g, 'd')
+            .replace(/Ð/g, 'd');
         }
 
         function renderTable(students) {
@@ -573,9 +578,9 @@
           }
         }
 
-        async function loadStudentsActive() {
+        async function loadStudentsActive(isActive) {
           try {
-            const activeValue = filterActiveSelect ? filterActiveSelect.value : '';
+            const activeValue = typeof isActive === 'boolean' ? (isActive ? 'true' : 'false') : filterActiveSelect ? filterActiveSelect.value : 'true';
             if (activeValue === '') {
               return loadStudentsAll();
             }
@@ -653,6 +658,26 @@
             setMode('all');
             loadStudents();
           });
+        }
+
+        if (btnLoadActive) {
+          btnLoadActive.addEventListener('click', function () {
+            activeFilterMode = (activeFilterMode + 1) % 3;
+            if (activeFilterMode === 1) {
+              btnLoadActive.innerHTML = '<i class="bi bi-check-circle me-1"></i> Đang hoạt động';
+              setMode('active');
+              loadStudentsActive(true);
+            } else if (activeFilterMode === 2) {
+              btnLoadActive.innerHTML = '<i class="bi bi-slash-circle me-1"></i> Đã khóa';
+              setMode('active');
+              loadStudentsActive(false);
+            } else {
+              btnLoadActive.innerHTML = '<i class="bi bi-filter-circle me-1"></i> Tất cả';
+              setMode('all');
+              loadStudentsAll();
+            }
+          });
+          btnLoadActive.innerHTML = '<i class="bi bi-filter-circle me-1"></i> Tất cả';
         }
 
         if (btnLoadPage) {
@@ -878,3 +903,9 @@
     </script>
   </body>
 </html>
+
+
+
+
+
+
